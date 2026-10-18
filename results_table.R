@@ -110,6 +110,13 @@ bbq_metrics <- function(y, k = 1, min_phase = 1, min_cycle = 2) {
   c(amplitude = mean(amp))
 }
 
+# Lag-k sample autocorrelation (standard estimator used by stats::acf)
+acf_k <- function(y, k) {
+  y <- as.numeric(y)
+  if (sd(y) == 0) return(NA_real_)
+  as.numeric(acf(y, lag.max = k, plot = FALSE)$acf[k + 1])
+}
+
 # =====================================================================
 # --- 1. Define Parameters (Beaudry 2017) ---
 # =====================================================================
@@ -136,6 +143,9 @@ mc_Q1_nl_beaudry <- numeric(M);
 mc_Q1_lin_beaudry <- numeric(M);
 # peak-trough movement storage
 mc_amp_nl_beaudry   <- numeric(M); mc_amp_lin_beaudry   <- numeric(M)
+# unconditional mean and lag-1 autocorrelation storage
+mc_mean_nl_beaudry <- numeric(M); mc_mean_lin_beaudry <- numeric(M)
+mc_ac1_nl_beaudry  <- numeric(M); mc_ac1_lin_beaudry  <- numeric(M)
 set.seed(123) # Set master seed for reproducibility of the MC loop
 for (m in 1:M) {
 
@@ -192,6 +202,12 @@ for (m in 1:M) {
   bbq_lin <- bbq_metrics(x_lin_m,  k = 1, min_phase = 1, min_cycle = 2)
   mc_amp_nl_beaudry[m]    <- bbq_nl["amplitude"]
   mc_amp_lin_beaudry[m]   <- bbq_lin["amplitude"]
+
+  # 5. Unconditional mean and lag-1 autocorrelation
+  mc_mean_nl_beaudry[m]  <- mean(series_m)
+  mc_mean_lin_beaudry[m] <- mean(x_lin_m)
+  mc_ac1_nl_beaudry[m]   <- acf_k(series_m, 1)
+  mc_ac1_lin_beaudry[m]  <- acf_k(x_lin_m, 1)
 }
 # =====================================================================
 # --- 4. PRINT OUT AVERAGED METRICS (Beaudry) ---
@@ -237,6 +253,9 @@ mc_Q1_nl_y <- numeric(M);
 mc_Q1_lin_y <- numeric(M);
 # peak-trough movement storage
 mc_amp_nl_y   <- numeric(M); mc_amp_lin_y   <- numeric(M)
+# unconditional mean and lag-1 autocorrelation storage
+mc_mean_nl_y <- numeric(M); mc_mean_lin_y <- numeric(M)
+mc_ac1_nl_y  <- numeric(M); mc_ac1_lin_y  <- numeric(M)
 set.seed(132)
 for (m in 1:M) {
 
@@ -292,6 +311,12 @@ for (m in 1:M) {
   bbq_lin <- bbq_metrics(ylin_m,           k = 1, min_phase = 1, min_cycle = 2)
   mc_amp_nl_y[m]    <- bbq_nl["amplitude"]
   mc_amp_lin_y[m]   <- bbq_lin["amplitude"]
+
+  # H. Unconditional mean and lag-1 autocorrelation
+  mc_mean_nl_y[m]  <- mean(ts_y)
+  mc_mean_lin_y[m] <- mean(ylin_m)
+  mc_ac1_nl_y[m]   <- acf_k(ts_y, 1)
+  mc_ac1_lin_y[m]  <- acf_k(ylin_m, 1)
 }
 # =====================================================================
 # --- 4. PRINT AVERAGED METRICS (2D System) ---
@@ -354,6 +379,9 @@ mc_min_nl_inv <- numeric(M); mc_min_lin_inv <- numeric(M)
 mc_Q1_nl_inv <- numeric(M); mc_Q1_lin_inv <- numeric(M)
 # peak-trough movement storage
 mc_amp_nl_inv   <- numeric(M); mc_amp_lin_inv   <- numeric(M)
+# unconditional mean and lag-1 autocorrelation storage
+mc_mean_nl_inv <- numeric(M); mc_mean_lin_inv <- numeric(M)
+mc_ac1_nl_inv  <- numeric(M); mc_ac1_lin_inv  <- numeric(M)
 set.seed(456)
 for (m in 1:M) {
 
@@ -406,6 +434,12 @@ for (m in 1:M) {
   mc_amp_nl_inv[m]    <- bbq_nl["amplitude"]
   mc_amp_lin_inv[m]   <- bbq_lin["amplitude"]
 
+  # Unconditional mean and lag-1 autocorrelation
+  mc_mean_nl_inv[m]  <- mean(series_m[, "Invest"])
+  mc_mean_lin_inv[m] <- mean(States_m[3, ])
+  mc_ac1_nl_inv[m]   <- acf_k(series_m[, "Invest"], 1)
+  mc_ac1_lin_inv[m]  <- acf_k(States_m[3, ], 1)
+
 }
 cat("--- 3D BGST MODEL ---\n")
 cat("   Linear VAR(1) Investment Volatility: ", round(mean(mc_sd_lin_inv), 4), "(", round(sd(mc_sd_lin_inv), 4), ")\n")
@@ -419,51 +453,69 @@ cat("   Linear VAR(1) Peak-Trough Movement: ", round(mean(mc_amp_lin_inv, na.rm=
 library(kableExtra)
 # 1. BUILD THE DATA FRAME (Explicitly writing out Mean and SD with paste0 and round)
 results_df <- data.frame(
-  Metric = c("Volatility (Std. Dev.)",
+  Metric = c("Unconditional Mean",
+             "Volatility",
+             "Autocorrelation (Lag 1)",
              "Downturn Severity (First Quartile)",
              "Downturn Severity (Max Crash)",
              "Peak-Trough Movement",
              "Max Eigenvalue (Modulus)"),
 
   # Model 1: Beaudry AR(3) System
-  Beaudry_Lin = c(paste0(round(mean(mc_sd_lin_beaudry), 4), " (", round(sd(mc_sd_lin_beaudry), 4), ")"),
+  Beaudry_Lin = c(paste0(round(mean(mc_mean_lin_beaudry), 4), " (", round(sd(mc_mean_lin_beaudry), 4), ")"),
+                  paste0(round(mean(mc_sd_lin_beaudry), 4), " (", round(sd(mc_sd_lin_beaudry), 4), ")"),
+                  paste0(round(mean(mc_ac1_lin_beaudry), 4), " (", round(sd(mc_ac1_lin_beaudry), 4), ")"),
  		  paste0(round(mean(mc_Q1_lin_beaudry), 4), " (", round(sd(mc_Q1_lin_beaudry), 4), ")"),
                   paste0(round(mean(mc_min_lin_beaudry), 4), " (", round(sd(mc_min_lin_beaudry), 4), ")"),
                   paste0(round(mean(mc_amp_lin_beaudry, na.rm=TRUE), 4), " (", round(sd(mc_amp_lin_beaudry, na.rm=TRUE), 4), ")"),
                   paste0(round(mean(mc_eigen_lin_beaudry), 4), " (", round(sd(mc_eigen_lin_beaudry), 4), ")")),
 
-  Beaudry_NL  = c(paste0(round(mean(mc_sd_nl_beaudry), 4), " (", round(sd(mc_sd_nl_beaudry), 4), ")"),
+  Beaudry_NL  = c(paste0(round(mean(mc_mean_nl_beaudry), 4), " (", round(sd(mc_mean_nl_beaudry), 4), ")"),
+                  paste0(round(mean(mc_sd_nl_beaudry), 4), " (", round(sd(mc_sd_nl_beaudry), 4), ")"),
+                  paste0(round(mean(mc_ac1_nl_beaudry), 4), " (", round(sd(mc_ac1_nl_beaudry), 4), ")"),
   		  paste0(round(mean(mc_Q1_nl_beaudry), 4), " (", round(sd(mc_Q1_nl_beaudry), 4), ")"),
                   paste0(round(mean(mc_min_nl_beaudry), 4), " (", round(sd(mc_min_nl_beaudry), 4), ")"),
                   paste0(round(mean(mc_amp_nl_beaudry, na.rm=TRUE), 4), " (", round(sd(mc_amp_nl_beaudry, na.rm=TRUE), 4), ")"),
                   round(true_eigen_dgp_beaudry, 4)),
 
   # Model 2: 2D System (Reporting OUTPUT 'y' ONLY)
-  TwoD_Out_Lin = c(paste0(round(mean(mc_sd_lin_y), 4), " (", round(sd(mc_sd_lin_y), 4), ")"),
+  TwoD_Out_Lin = c(paste0(round(mean(mc_mean_lin_y), 4), " (", round(sd(mc_mean_lin_y), 4), ")"),
+                  paste0(round(mean(mc_sd_lin_y), 4), " (", round(sd(mc_sd_lin_y), 4), ")"),
+                  paste0(round(mean(mc_ac1_lin_y), 4), " (", round(sd(mc_ac1_lin_y), 4), ")"),
                    paste0(round(mean(mc_Q1_lin_y), 4), " (", round(sd(mc_Q1_lin_y), 4), ")"),
                    paste0(round(mean(mc_min_lin_y), 4), " (", round(sd(mc_min_lin_y), 4), ")"),
                    paste0(round(mean(mc_amp_lin_y, na.rm=TRUE), 4), " (", round(sd(mc_amp_lin_y, na.rm=TRUE), 4), ")"),
                    paste0(round(mean(mc_eigen_lin_2D), 4), " (", round(sd(mc_eigen_lin_2D), 4), ")")),
 
-  TwoD_Out_NL  = c(paste0(round(mean(mc_sd_nl_y), 4), " (", round(sd(mc_sd_nl_y), 4), ")"),
+  TwoD_Out_NL  = c(paste0(round(mean(mc_mean_nl_y), 4), " (", round(sd(mc_mean_nl_y), 4), ")"),
+                  paste0(round(mean(mc_sd_nl_y), 4), " (", round(sd(mc_sd_nl_y), 4), ")"),
+                  paste0(round(mean(mc_ac1_nl_y), 4), " (", round(sd(mc_ac1_nl_y), 4), ")"),
                    paste0(round(mean(mc_Q1_nl_y), 4), " (", round(sd(mc_Q1_nl_y), 4), ")"),
                    paste0(round(mean(mc_min_nl_y), 4), " (", round(sd(mc_min_nl_y), 4), ")"),
                    paste0(round(mean(mc_amp_nl_y, na.rm=TRUE), 4), " (", round(sd(mc_amp_nl_y, na.rm=TRUE), 4), ")"),
                    round(true_eigen_dgp_2D, 4)),
 
   # Model 3: Three-Variable System (Reporting INVESTMENT ONLY)
-  ThreeVar_Lin = c(paste0(round(mean(mc_sd_lin_inv), 4), " (", round(sd(mc_sd_lin_inv), 4), ")"),
+  ThreeVar_Lin = c(paste0(round(mean(mc_mean_lin_inv), 4), " (", round(sd(mc_mean_lin_inv), 4), ")"),
+                  paste0(round(mean(mc_sd_lin_inv), 4), " (", round(sd(mc_sd_lin_inv), 4), ")"),
+                  paste0(round(mean(mc_ac1_lin_inv), 4), " (", round(sd(mc_ac1_lin_inv), 4), ")"),
                    paste0(round(mean(mc_Q1_lin_inv), 4), " (", round(sd(mc_Q1_lin_inv), 4), ")"),
                    paste0(round(mean(mc_min_lin_inv), 4), " (", round(sd(mc_min_lin_inv), 4), ")"),
                    paste0(round(mean(mc_amp_lin_inv, na.rm=TRUE), 4), " (", round(sd(mc_amp_lin_inv, na.rm=TRUE), 4), ")"),
                    paste0(round(mean(mc_eigen_lin_3D), 4), " (", round(sd(mc_eigen_lin_3D), 4), ")")),
 
-  ThreeVar_NL  = c(paste0(round(mean(mc_sd_nl_inv), 4), " (", round(sd(mc_sd_nl_inv), 4), ")"),
+  ThreeVar_NL  = c(paste0(round(mean(mc_mean_nl_inv), 4), " (", round(sd(mc_mean_nl_inv), 4), ")"),
+                  paste0(round(mean(mc_sd_nl_inv), 4), " (", round(sd(mc_sd_nl_inv), 4), ")"),
+                  paste0(round(mean(mc_ac1_nl_inv), 4), " (", round(sd(mc_ac1_nl_inv), 4), ")"),
                    paste0(round(mean(mc_Q1_nl_inv), 4), " (", round(sd(mc_Q1_nl_inv), 4), ")"),
                    paste0(round(mean(mc_min_nl_inv), 4), " (", round(sd(mc_min_nl_inv), 4), ")"),
                    paste0(round(mean(mc_amp_nl_inv, na.rm=TRUE), 4), " (", round(sd(mc_amp_nl_inv, na.rm=TRUE), 4), ")"),
                    round(true_eigen_dgp_3D, 4))
 )
+# Row order used in Table 2 of the paper:
+# peak-trough, volatility, max crash, first quartile, max eigenvalue, mean, autocorrelation
+results_df <- results_df[c(6, 2, 5, 4, 7, 1, 3), ]
+rownames(results_df) <- NULL
 # 2. COMPILE INTO LATEX CODE
 latex_table <- kbl(results_df,
                    format = "latex",
