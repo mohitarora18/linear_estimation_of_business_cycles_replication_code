@@ -9,7 +9,7 @@ a1 <- 1.5
 a2 <- -0.6
 a3 <- -0.3
 a_cub <- -0.01 
-sigma_eps <- 0.25
+sigma_eps <- 0.22360679775
 p <- 3
 
 Burn_In <- 600     # Number of periods to discard (transient phase)
@@ -53,7 +53,7 @@ y_max <- max(c(series, x_lin), na.rm = TRUE)
 # --- 5. Plotting (HD Specifications) ---
 # =====================================================================
 
-png("Beaudry_Univariate_Plot_HD.png", width = 2500, height = 1500, res = 300)
+png("~/Desktop/New_Plots/Beaudry_Univariate_Plot_HD.png", width = 2500, height = 1500, res = 300)
 
 par(mfrow = c(1, 1), mar = c(5, 5, 4, 2), cex = 1.1, cex.main = 1.4, cex.lab = 1.2, cex.axis = 1.1) 
 

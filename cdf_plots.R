@@ -155,7 +155,6 @@ acf_k <- function(y, k) {
 # =====================================================================
 # --- 1. Define Fixed Parameters (Beaudry 2017) ---
 # =====================================================================
-sigma_eps <- 0.25
 p <- 3
 Burn_In <- 600     # Number of periods to discard (transient phase)
 Num_Obs <- 300     # Number of periods to actually plot/analyze
@@ -193,10 +192,12 @@ mean_ratio_beaudry <- numeric(M)
 set.seed(123) # Set master seed for reproducibility of the MC loop
 for (m in 1:M) {
   # A. Generate model parameters   
-  a1    <- runif(1, 0.60, 1.50)    #1.5
-  a2    <- runif(1, -0.625, -0.575)  #-0.6
-  a3    <- runif(1, -0.325, -0.275)  #-0.3
-  a_cub <- runif(1, -0.010, -0.005) #-0.01
+  a1    <- runif(1, 0.60, 1.50)     
+  a2    <- runif(1, -0.625, -0.575)  
+  a3    <- runif(1, -0.325, -0.275)  
+  a_cub <- runif(1, -0.010, -0.005) 
+  
+  sigma_eps <- sqrt(runif(1, 0.0, 0.1))  
   
   Comp_Mat_DGP <- rbind(c(a1, a2, a3),
                         c(1, 0, 0),
@@ -320,9 +321,12 @@ mark_at_one <- function(x) {
        adj = c(-0.15, -0.5), col = "blue", cex = CEX_MARK)
 }
 
+# ---------------------------------------------------------------------
+# CDF plots
+# ---------------------------------------------------------------------
 
 # peak-trough movement ratio CDF 
-open_png("~/Desktop/Applied_EL_Revisions/Beaudry/Beaudry_peak_trough_movement_ratio_CDF.png")
+open_png("~/Desktop/New_Plots/CDFs/Beaudry/Beaudry_peak_trough_movement_ratio_CDF.png")
 plot(ecdf(peak_trough_movement_ratio_beaudry), xlim=auto_xlim(peak_trough_movement_ratio_beaudry), xaxt = "n", xlab = "", ylab = "", main = "", lwd=2.5, cex.lab = CEX_LAB, cex.axis = CEX_AXIS)
 draw_x_axis()
 title_x(xlab2("Peak-Trough Movement"))
@@ -330,7 +334,7 @@ mark_at_one(peak_trough_movement_ratio_beaudry)
 dev.off()  
 
 # volatility ratio CDF 
-open_png("~/Desktop/Applied_EL_Revisions/Beaudry/Beaudry_volatility_ratio_CDF.png")
+open_png("~/Desktop/New_Plots/CDFs/Beaudry/Beaudry_volatility_ratio_CDF.png")
 plot(ecdf(volatility_ratio_beaudry), xlim=auto_xlim(volatility_ratio_beaudry), xaxt = "n", xlab = "", ylab = "", main = "", lwd=2.5, cex.lab = CEX_LAB, cex.axis = CEX_AXIS)
 draw_x_axis()
 title_x(xlab2("Volatility"))
@@ -338,7 +342,7 @@ mark_at_one(volatility_ratio_beaudry)
 dev.off()  
 
 # downturn first  quartile ratio CDF 
-open_png("~/Desktop/Applied_EL_Revisions/Beaudry/Beaudry_downturn_first_Q_ratio_CDF.png")
+open_png("~/Desktop/New_Plots/CDFs/Beaudry/Beaudry_downturn_first_Q_ratio_CDF.png")
 plot(ecdf(downturn_first_Q_ratio_beaudry), xlim=auto_xlim(downturn_first_Q_ratio_beaudry), xaxt = "n", xlab = "", ylab = "", main = "", lwd=2.5, cex.lab = CEX_LAB, cex.axis = CEX_AXIS)
 draw_x_axis()
 title_x(xlab2("Downturn Severity (First Quartile)"))
@@ -346,7 +350,7 @@ mark_at_one(downturn_first_Q_ratio_beaudry)
 dev.off()    
 
 # max crash ratio CDF 
-open_png("~/Desktop/Applied_EL_Revisions/Beaudry/Beaudry_max_crash_ratio_CDF.png")
+open_png("~/Desktop/New_Plots/CDFs/Beaudry/Beaudry_max_crash_ratio_CDF.png")
 plot(ecdf(max_crash_ratio_beaudry), xlim=auto_xlim(max_crash_ratio_beaudry), xaxt = "n", xlab = "", ylab = "", main = "", lwd=2.5, cex.lab = CEX_LAB, cex.axis = CEX_AXIS)
 draw_x_axis()
 title_x(xlab2("Downturn Severity (Max Crash)"))
@@ -354,7 +358,7 @@ mark_at_one(max_crash_ratio_beaudry)
 dev.off() 
 
 #ac1 ratio CDF 
-open_png("~/Desktop/Applied_EL_Revisions/Beaudry/Beaudry_ac1_ratio_CDF.png")
+open_png("~/Desktop/New_Plots/CDFs/Beaudry/Beaudry_ac1_ratio_CDF.png")
 plot(ecdf(ac1_ratio_beaudry), xlim=auto_xlim(ac1_ratio_beaudry), xaxt = "n", xlab = "", ylab = "", main = "", lwd=2.5, cex.lab = CEX_LAB, cex.axis = CEX_AXIS)
 draw_x_axis()
 title_x(xlab2("Autocorrelation (lag 1)"))
@@ -362,7 +366,7 @@ mark_at_one(ac1_ratio_beaudry)
 dev.off() 
 
 # max eig val ratio CDF 
-open_png("~/Desktop/Applied_EL_Revisions/Beaudry/Beaudry_max_eig_val_ratio_CDF.png")
+open_png("~/Desktop/New_Plots/CDFs/Beaudry/Beaudry_max_eig_val_ratio_CDF.png")
 plot(ecdf(max_eigenvalue_ratio_beaudry), xlim=auto_xlim(max_eigenvalue_ratio_beaudry), xaxt = "n", xlab = "", ylab = "", main = "", lwd=2.5, cex.lab = CEX_LAB, cex.axis = CEX_AXIS)
 draw_x_axis()
 title_x(xlab2("Max Eigenvalue (Modulus)"))
@@ -370,7 +374,7 @@ mark_at_one(max_eigenvalue_ratio_beaudry)
 dev.off()
 
 # unconditional mean ratio CDF 
-open_png("~/Desktop/Applied_EL_Revisions/Beaudry/Beaudry_mean_ratio_CDF.png")
+open_png("~/Desktop/New_Plots/CDFs/Beaudry/Beaudry_mean_ratio_CDF.png")
 plot(ecdf(mean_ratio_beaudry), xlim=auto_xlim(mean_ratio_beaudry), xaxt = "n", xlab = "", ylab = "", main = "", lwd=2.5, cex.lab = CEX_LAB, cex.axis = CEX_AXIS)
 draw_x_axis()
 title_x(xlab2("Unconditional Mean"))
@@ -392,10 +396,7 @@ p <- 1 # 1 lag in the system
 Burn_In <- 600     # Discard transient phase
 Num_Obs <- 300     # Periods to plot/analyze
 Total_Sim <- Burn_In + Num_Obs
-# Multivariate Shock Covariance Matrix
-eps_var <- matrix(c(0.0001, 0.00,
-                    0.00, 0.0001),
-                  nrow = 2, byrow = TRUE)
+
 # =====================================================================
 # --- 2. MONTE CARLO SIMULATION ---
 # =====================================================================
@@ -429,20 +430,24 @@ mean_ratio_y <- numeric(M)
 set.seed(132)
 for (m in 1:M) {
   # A. Generate model parameters
-  y_max <- runif(1,0,150)  #100
-  I_min <- runif(1,-75,0) #-50
-  c <- runif(1,0,1)  #0.9
-  beta <- runif(1,0,5) #2
+  y_max <- runif(1,0,150)   
+  I_min <- runif(1,-75,0)  
+  c <- runif(1,0,1)   
+  beta <- runif(1,0,5)  
   
   B_true <- matrix(c((c * beta) + c, -beta,
                      c,              0),
                    nrow=2, ncol=2, byrow=TRUE)
   true_eigen_dgp_2D[m] <- max(Mod(eigen(B_true)$values))
   
-  
+  # Multivariate Shock Covariance Matrix
+  eps <- runif(1, 0.0, 0.1)  
+  sigma <- matrix(c(eps, 0.00,  
+                    0.00, eps), 
+                  nrow = 2, byrow = TRUE)
   
   # B. Generate multivariate noise
-  shocks_m <- t(rmvnorm(Total_Sim + p, mean = c(0, 0), sigma = eps_var))
+  shocks_m <- t(rmvnorm(Total_Sim + p, mean = c(0, 0), sigma = sigma))
   
   ym <- numeric(Total_Sim + p)
   cm <- numeric(Total_Sim + p)
@@ -476,7 +481,7 @@ for (m in 1:M) {
   ylin_m[1] <- ts_y[1]; clin_m[1] <- ts_c[1]
   
   for (t in 2:Num_Obs) {
-    ylin_m[t] <- coef(r1_m)[1] + coef(r1_m)[2]*ylin_m[t-1] + coef(r1_m)[3]*clin_m[t-1] + shocks_m[1, Burn_In + p + t]
+    ylin_m[t] <- coef(r1_m)[1] + coef(r1_m)[2]*ylin_m[t-1] + coef(r1_m)[3]*clin_m[t-1] + shocks_m[1, Burn_In + p + t]+ (1+beta)*shocks_m[2, Burn_In+p + t]
     clin_m[t] <- coef(r2_m)[1] + coef(r2_m)[2]*ylin_m[t-1] + coef(r2_m)[3]*clin_m[t-1] + shocks_m[2, Burn_In + p + t]
   }
   
@@ -582,10 +587,11 @@ draw_x_axis <- function(log = FALSE) {
   axis(1, at = 1, labels = "1", cex.axis = CEX_AXIS)
 }
 
-# Draw one CDF plot; the log axis is chosen automatically by needs_log().
+# Draw one CDF plot; the log axis is chosen automatically by needs_log(),
+# unless force_log = TRUE, which always uses a log axis.
 # coverage sets the share of runs shown on a regular axis (default 99%)
-plot_cdf <- function(x, file, xlab, coverage = 0.99) {
-  lg <- needs_log(x)
+plot_cdf <- function(x, file, xlab, coverage = 0.99, force_log = FALSE) {
+  lg <- force_log || needs_log(x)
   cat(sprintf("%-45s %s\n", file, if (lg) "log x-axis" else "regular x-axis"))
   open_png(file)
   plot(ecdf(x), xlim = cdf_xlim(x, log = lg, coverage = coverage), log = if (lg) "x" else "", xaxt = "n",
@@ -598,35 +604,41 @@ plot_cdf <- function(x, file, xlab, coverage = 0.99) {
 }
 
 # ---------------------------------------------------------------------
-# The seven CDF plots
+# CDF plots
 # ---------------------------------------------------------------------
 
 # peak-trough movement ratio CDF
-plot_cdf(peak_trough_movement_ratio_y, "~/Desktop/Applied_EL_Revisions/SM39/SM39_peak_trough_movement_ratio_y_CDF.png",
-         xlab2("Peak-Trough Movement"))
+# One draw has a ratio of 0 (the nonlinear series has no swings), which a log
+# axis cannot show. It is dropped, and the remaining draws are plotted on a log axis.
+pt_pos <- peak_trough_movement_ratio_y[is.finite(peak_trough_movement_ratio_y) &
+                                         peak_trough_movement_ratio_y > 0]
+cat("Peak-trough draws plotted:", length(pt_pos), "\n")   # should print 9999
+
+plot_cdf(pt_pos, "~/Desktop/New_Plots/CDFs/SM39/SM39_peak_trough_movement_ratio_CDF.png",
+         xlab2("Peak-Trough Movement"), force_log = TRUE)
 
 # volatility ratio CDF
-plot_cdf(volatility_ratio_y, "~/Desktop/Applied_EL_Revisions/SM39/SM39_volatility_ratio_CDF.png",
+plot_cdf(volatility_ratio_y, "~/Desktop/New_Plots/CDFs/SM39/SM39_volatility_ratio_CDF.png",
          xlab2("Volatility"))
 
 # downturn first quartile ratio CDF
-plot_cdf(downturn_first_Q_ratio_y, "~/Desktop/Applied_EL_Revisions/SM39/SM39_downturn_first_Q_ratio_CDF.png",
+plot_cdf(downturn_first_Q_ratio_y, "~/Desktop/New_Plots/CDFs/SM39/SM39_downturn_first_Q_ratio_CDF.png",
          xlab2("Downturn Severity (First Quartile)"), coverage = 0.95)
 
 # max crash ratio CDF
-plot_cdf(max_crash_ratio_y, "~/Desktop/Applied_EL_Revisions/SM39/SM39_max_crash_ratio_CDF.png",
+plot_cdf(max_crash_ratio_y, "~/Desktop/New_Plots/CDFs/SM39/SM39_max_crash_ratio_CDF.png",
          xlab2("Downturn Severity (Max Crash)"))
 
 # ac1 ratio CDF
-plot_cdf(ac1_ratio_y, "~/Desktop/Applied_EL_Revisions/SM39/SM39_ac1_ratio_CDF.png",
+plot_cdf(ac1_ratio_y, "~/Desktop/New_Plots/CDFs/SM39/SM39_ac1_ratio_CDF.png",
          xlab2("Autocorrelation (lag 1)"), coverage = 0.95)
 
 # max eig val ratio CDF
-plot_cdf(max_eigenvalue_ratio_y, "~/Desktop/Applied_EL_Revisions/SM39/SM39_max_eig_val_ratio_CDF.png",
+plot_cdf(max_eigenvalue_ratio_y, "~/Desktop/New_Plots/CDFs/SM39/SM39_max_eig_val_ratio_CDF.png",
          xlab2("Max Eigenvalue (Modulus)"))
 
 # unconditional mean ratio CDF
-plot_cdf(mean_ratio_y, "~/Desktop/Applied_EL_Revisions/SM39/SM39_mean_ratio_CDF.png",
+plot_cdf(mean_ratio_y, "~/Desktop/New_Plots/CDFs/SM39/SM39_mean_ratio_CDF.png",
          xlab2("Unconditional Mean"))
 
 
@@ -638,11 +650,6 @@ library(mvtnorm)
 # --- 1. Fixed Define Parameters (BGST 3D System) ---
 # =====================================================================
 
-# Shock Covariance Matrix
-eps_var <- matrix(c(0.0001, 0.00, 0.00,
-                    0.00, 0.0001, 0.00,
-                    0.00, 0.00, 0.0001),
-                  nrow = 3, byrow = TRUE)
 p <- 1             # Lags in the estimated VAR(1)
 Burn_In <- 600     # Discard transient phase
 Num_Obs <- 300     # Periods to analyze/plot
@@ -675,21 +682,28 @@ mean_ratio_BGST <- numeric(M)
 set.seed(456)
 for (m in 1:M) {
   
-  ###  
-  rho      <- runif(1,0.90,0.98) #0.95
-  theta    <- runif(1,0.5,1.5) #0.913
-  eta      <- runif(1,5,10) #8
-  phi_inv  <- runif(1,0.1,0.5) #0.25
-  phi_cost <- runif(1,0.5,1) #0.67
-  repay    <- runif(1,0.05,0.2) #0.1
-  gamma <- runif(1, 0.1, 0.6)  # 0.5
-  alpha <- runif(1, 1.25, 5)  # 2.5
+  # Generate model parameters
+  rho      <- runif(1,0.90,0.98)  
+  theta    <- runif(1,0.5,1.5) 
+  eta      <- runif(1,1,3)  
+  phi_inv  <- runif(1,0.1,0.5)  
+  phi_cost <- runif(1,0.5,1) 
+  repay    <- runif(1,0.05,0.2)  
+  gamma <- runif(1, 0.1, 0.6)  
+  alpha <- runif(1, 1.25, 5)   
+  
+  # Shock Covariance Matrix
+  eps <- runif(1, 0.0, 0.1)  
+  sigma <- matrix(c(eps, 0.00, 0.00,   
+                    0.00, eps, 0.00,  
+                    0.00, 0.00, eps), 
+                  nrow = 3, byrow = TRUE)
   
   # =====================================================================
   # --- 2. ANALYTICAL PROOF: True DGP Stability ---
   # =====================================================================
   ss_equation <- function(b) { (repay * b) + (gamma * alpha * phi_cost * exp(eta * b)) }
-  b_star <- uniroot(ss_equation, lower = -2, upper = 0)$root
+  b_star <- uniroot(ss_equation, lower = -2, upper = 0, extendInt = "upX")$root
   E_star <- alpha * exp(eta * b_star)
   I_star <- -phi_cost * E_star
   J_true <- matrix(0, nrow=3, ncol=3)
@@ -706,7 +720,7 @@ for (m in 1:M) {
   # --- 3. Simulate Dynamics ---
   # =====================================================================
   
-  shocks_m <- t(rmvnorm(Total_Sim + p, mean=c(0,0,0), sigma = eps_var))
+  shocks_m <- t(rmvnorm(Total_Sim + p, mean=c(0,0,0), sigma = sigma))
   xm_NL <- matrix(0, nrow = 3, ncol = Total_Sim + p)
   
   for(t in 2:(Total_Sim + p)){
@@ -737,7 +751,12 @@ for (m in 1:M) {
   
   for (t in 2:Num_Obs) {
     States_m[,t] <- cm_real + J_m %*% States_m[,t-1]
-    States_m[, t] <- States_m[, t] + shocks_m[, Burn_In + p + t]
+    
+    shock=shocks_m[, Burn_In+p + t]
+    shock[2]=shock[2]+gamma*(shock[3]+phi_inv*(rho+theta)*shock[1]+phi_cost*alpha*eta*exp(eta*b_star)*shock[1])
+    shock[3]=shock[3]+phi_inv*(rho+theta)*shock[1]+phi_cost*alpha*eta*exp(eta*b_star)*shock[1]
+    
+    States_m[, t] <- States_m[, t] + shock
   }
   
   mc_sd_nl_inv[m] <- sd(series_m[, "Invest"])
@@ -855,33 +874,112 @@ plot_cdf <- function(x, file, xlab) {
 }
 
 # ---------------------------------------------------------------------
-# The seven CDF plots
+# CDF plots
 # ---------------------------------------------------------------------
 
 # peak-trough movement ratio CDF
-plot_cdf(peak_trough_movement_ratio_BGST, "~/Desktop/Applied_EL_Revisions/BGST/BGST_peak_trough_movement_ratio_CDF.png",
+plot_cdf(peak_trough_movement_ratio_BGST, "~/Desktop/New_Plots/CDFs/BGST/BGST_peak_trough_movement_ratio_CDF.png",
          xlab2("Peak-Trough Movement"))
 
 # volatility ratio CDF
-plot_cdf(volatility_ratio_BGST, "~/Desktop/Applied_EL_Revisions/BGST/BGST_volatility_ratio_CDF.png",
+plot_cdf(volatility_ratio_BGST, "~/Desktop/New_Plots/CDFs/BGST/BGST_volatility_ratio_CDF.png",
          xlab2("Volatility"))
 
 # downturn first quartile ratio CDF
-plot_cdf(downturn_first_Q_ratio_BGST, "~/Desktop/Applied_EL_Revisions/BGST/BGST_downturn_first_Q_ratio_CDF.png",
+plot_cdf(downturn_first_Q_ratio_BGST, "~/Desktop/New_Plots/CDFs/BGST/BGST_downturn_first_Q_ratio_CDF.png",
          xlab2("Downturn Severity (First Quartile)"))
 
 # max crash ratio CDF
-plot_cdf(max_crash_ratio_BGST, "~/Desktop/Applied_EL_Revisions/BGST/BGST_max_crash_ratio_CDF.png",
+plot_cdf(max_crash_ratio_BGST, "~/Desktop/New_Plots/CDFs/BGST/BGST_max_crash_ratio_CDF.png",
          xlab2("Downturn Severity (Max Crash)"))
 
 # ac1 ratio CDF
-plot_cdf(ac1_ratio_BGST, "~/Desktop/Applied_EL_Revisions/BGST/BGST_ac1_ratio_CDF.png",
+plot_cdf(ac1_ratio_BGST, "~/Desktop/New_Plots/CDFs/BGST/BGST_ac1_ratio_CDF.png",
          xlab2("Autocorrelation (lag 1)"))
 
 # max eig val ratio CDF
-plot_cdf(max_eigenvalue_ratio_BGST, "~/Desktop/Applied_EL_Revisions/BGST/BGST_max_eig_val_ratio_CDF.png",
+plot_cdf(max_eigenvalue_ratio_BGST, "~/Desktop/New_Plots/CDFs/BGST/BGST_max_eig_val_ratio_CDF.png",
          xlab2("Max Eigenvalue (Modulus)"))
 
 # unconditional mean ratio CDF
-plot_cdf(mean_ratio_BGST, "~/Desktop/Applied_EL_Revisions/BGST/BGST_mean_ratio_CDF.png",
+plot_cdf(mean_ratio_BGST, "~/Desktop/New_Plots/CDFs/BGST/BGST_mean_ratio_CDF.png",
          xlab2("Unconditional Mean"))
+
+
+# =====================================================================
+# --- 5. CDF SUMMARY NUMBERS FOR THE WRITE-UP (all three models) ---
+# For each nonlinear/linear ratio:
+#   F_at_1          = CDF height at 1 (the blue value printed on each plot)
+#   share_above_1   = 1 - F_at_1: share of draws with ratio > 1, i.e. the
+#                     linear model understates the statistic
+#   Q3_ratio        = third quartile of the ratio
+#   underst_at_Q3   = 1 - 1/Q3_ratio: in a quarter of draws the linear model
+#                     understates the statistic by at least this much,
+#                     using (nonlinear - linear)/nonlinear as in footnote 4
+# =====================================================================
+
+cdf_summary <- function(x) {
+  x  <- x[is.finite(x)]
+  F1 <- ecdf(x)(1)
+  q3 <- as.numeric(quantile(x, 0.75))
+  c(n_draws       = length(x),
+    F_at_1        = F1,
+    share_above_1 = 1 - F1,
+    Q3_ratio      = q3,
+    underst_at_Q3 = 1 - 1 / q3)
+}
+
+ratios <- list(
+  Beaudry = list(peak_trough = peak_trough_movement_ratio_beaudry,
+                 volatility  = volatility_ratio_beaudry,
+                 max_crash   = max_crash_ratio_beaudry,
+                 first_Q     = downturn_first_Q_ratio_beaudry,
+                 max_eigen   = max_eigenvalue_ratio_beaudry,
+                 mean        = mean_ratio_beaudry,
+                 ac1         = ac1_ratio_beaudry),
+  SM39    = list(peak_trough = pt_pos,   # same vector as plotted
+                 volatility  = volatility_ratio_y,
+                 max_crash   = max_crash_ratio_y,
+                 first_Q     = downturn_first_Q_ratio_y,
+                 max_eigen   = max_eigenvalue_ratio_y,
+                 mean        = mean_ratio_y,
+                 ac1         = ac1_ratio_y),
+  BGST    = list(peak_trough = peak_trough_movement_ratio_BGST,
+                 volatility  = volatility_ratio_BGST,
+                 max_crash   = max_crash_ratio_BGST,
+                 first_Q     = downturn_first_Q_ratio_BGST,
+                 max_eigen   = max_eigenvalue_ratio_BGST,
+                 mean        = mean_ratio_BGST,
+                 ac1         = ac1_ratio_BGST)
+)
+
+cdf_table <- do.call(rbind, lapply(names(ratios), function(mod) {
+  do.call(rbind, lapply(names(ratios[[mod]]), function(stat) {
+    s <- cdf_summary(ratios[[mod]][[stat]])
+    data.frame(model = mod, statistic = stat, t(s), row.names = NULL)
+  }))
+}))
+
+# Percentages, rounded the way they appear in the text
+cdf_table_pct <- transform(cdf_table,
+                           pct_understated = round(100 * share_above_1),
+                           pct_underst_Q3  = round(100 * underst_at_Q3))
+print(cdf_table_pct[, c("model", "statistic", "n_draws", "F_at_1",
+                        "pct_understated", "Q3_ratio", "pct_underst_Q3")],
+      digits = 4)
+
+library(writexl)
+write_xlsx(cdf_table_pct, "~/Desktop/New_Plots/CDFs/cdf_summary.xlsx")
+
+
+# Share of draws where the max crash ratio is exactly 1 (identical minima),
+# i.e. the vertical jump at 1 in each max crash CDF
+jump_at_1 <- function(r) {
+  r <- r[is.finite(r)]
+  c(share_exactly_1 = mean(abs(r - 1) < 1e-12),
+    share_within_1pct = mean(abs(r - 1) < 0.01))
+}
+
+rbind(Beaudry = jump_at_1(max_crash_ratio_beaudry),
+      SM39    = jump_at_1(max_crash_ratio_y),
+      BGST    = jump_at_1(max_crash_ratio_BGST))

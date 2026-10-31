@@ -7,8 +7,11 @@ library(mvtnorm)
 # =====================================================================
 # --- 1. Define Parameters (SM39 Bivariate System) ---
 # =====================================================================
-y_max <- 100
+y_max <- 100   
 I_min <- -50
+c_param <- 0.9
+beta_param <- 2
+
 p <- 1 # 1 lag in the system
 
 Burn_In <- 600     # Discard transient phase
@@ -16,8 +19,9 @@ Num_Obs <- 300     # Periods to plot/analyze
 Total_Sim <- Burn_In + Num_Obs
 
 # Multivariate Shock Covariance Matrix
-eps_var <- matrix(c(0.0001, 0.00,  
-                    0.00, 0.0001), 
+eps <- 0.05
+sigma <- matrix(c(eps, 0.00,  
+                    0.00, eps), 
                   nrow = 2, byrow = TRUE)
 
 # =====================================================================
@@ -26,7 +30,7 @@ eps_var <- matrix(c(0.0001, 0.00,
 set.seed(42) 
 
 # Generate correlated multivariate shocks
-shocks <- t(rmvnorm(Total_Sim + p-1 , mean = c(0, 0), sigma = eps_var))
+shocks <- t(rmvnorm(Total_Sim + p-1 , mean = c(0, 0), sigma = sigma))
 
 y_full <- numeric(Total_Sim + p)
 c_full <- numeric(Total_Sim + p)
@@ -35,8 +39,7 @@ c_full <- numeric(Total_Sim + p)
 y_full[1] <- 0
 c_full[1] <- 0
 
-beta_param <- 2 
-c_param <- as.numeric(args[1])
+ 
 
 # Simulate True Bivariate Nonlinear DGP
 for (t in (p+1):(Total_Sim + p)) {
@@ -71,12 +74,13 @@ y_lin[1] <- series_y[1]
 c_lin[1] <- series_c[1]
 
 for (t in (p+1):Num_Obs) {
-  y_lin[t] <- c_y + b_yy*y_lin[t-1] + b_yc*c_lin[t-1] + shocks[1, Burn_In+p + t-1]
+  # use the same (linearized) shocks as the DGP
+  y_lin[t] <- c_y + b_yy*y_lin[t-1] + b_yc*c_lin[t-1] + shocks[1, Burn_In+p + t-1]+ (1+beta_param)*shocks[2, Burn_In+p + t-1]
   c_lin[t] <- c_c + b_cy*y_lin[t-1] + b_cc*c_lin[t-1] + shocks[2, Burn_In+p + t-1]
 }
 
 # Plotting
-png(paste("SM39_Bivariate_Plot_HD_c=",c_param,".png",sep=""), width = 2500, height = 3000, res = 300)
+png(paste("~/Desktop/New_Plots/SM39_Bivariate_Plot_HD_c=",c_param,".png",sep=""), width = 2500, height = 3000, res = 300)
 par(mfrow = c(2, 1), mar = c(5, 5, 4, 2), cex = 1.1, cex.main = 1.4, cex.lab = 1.2, cex.axis = 1.1) 
 
 Zoom_Window <- 1:200
@@ -111,5 +115,31 @@ lines(Zoom_Window,c_lin_zoom, col="red", lwd=1, lty=2)
 
 legend("bottom", legend=c("Nonlinear Dynamics", "Linear Dynamics"), 
        col=c("darkgreen", "orange"), lty=c(1, 2), lwd=1, horiz=TRUE, bty="n", cex=1)
+
+dev.off()
+
+
+
+
+
+# Plotting
+png(paste("~/Desktop/New_Plots/SM39_Bivariate_Plot_HD_c=",c_param,".png",sep=""), width = 2500, height = 1800, res = 300)
+par(mar = c(5, 5, 4, 2), cex = 1.1, cex.main = 1.4, cex.lab = 1.2, cex.axis = 1.1)
+
+Zoom_Window <- 1:200
+
+series_y_zoom <- as.numeric(series_y)[Zoom_Window]
+y_lin_zoom <- y_lin[Zoom_Window]
+
+# Output Dynamics (Nonlinear vs Linear)
+y_range_out <- range(c(series_y_zoom, y_lin_zoom), na.rm = TRUE)
+y_range_out[1] <- y_range_out[1] - diff(y_range_out) * 0.30
+
+plot(Zoom_Window, series_y_zoom, type="l", col="blue", lwd=1, ylim=y_range_out,
+     ylab = "Output Value", xlab = "Time", main = "Output (Y): True DGP vs. Linear VAR(1)")
+lines(Zoom_Window, y_lin_zoom, col="red", lwd=1, lty=2)
+
+legend("bottom", legend=c("Nonlinear Dynamics", "Linear Dynamics"),
+       col=c("blue", "red"), lty=c(1, 2), lwd=1, horiz=TRUE, bty="n", cex=1)
 
 dev.off()

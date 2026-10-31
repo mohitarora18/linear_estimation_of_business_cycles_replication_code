@@ -124,7 +124,7 @@ a1 <- 1.5
 a2 <- -0.6
 a3 <- -0.3
 a_cub <- -0.01
-sigma_eps <- 0.25
+sigma_eps <- 0.22360679775 #0.05
 p <- 3
 Burn_In <- 600     # Number of periods to discard (transient phase)
 Num_Obs <- 300     # Number of periods to actually plot/analyze
@@ -218,15 +218,19 @@ Comp_Mat_DGP <- rbind(c(a1, a2, a3),
 true_eigen_dgp_beaudry <- max(Mod(eigen(Comp_Mat_DGP)$values))
 cat("--- BEAUDRY MODEL ---\n")
 cat("   Linear AR(3) Volatility: ", round(mean(mc_sd_lin_beaudry), 4), "(", round(sd(mc_sd_lin_beaudry), 4), ")\n")
+cat("   Nonlinear Volatility: ", round(mean(mc_sd_nl_beaudry), 4), "(", round(sd(mc_sd_nl_beaudry), 4), ")\n")
 cat("   Linear AR(3) Q1: ", round(mean(mc_Q1_lin_beaudry), 4), "(", round(sd(mc_Q1_lin_beaudry), 4), ")\n")
+cat("   Nonlinear Q1: ", round(mean(mc_Q1_nl_beaudry), 4), "(", round(sd(mc_Q1_nl_beaudry), 4), ")\n")
 cat("   Linear AR(3) Min: ", round(mean(mc_min_lin_beaudry), 4), "(", round(sd(mc_min_lin_beaudry), 4), ")\n")
-cat("   Linear AR(3) Peak-Trough Movement: ", round(mean(mc_amp_lin_beaudry, na.rm=TRUE), 4), "(", round(sd(mc_amp_lin_beaudry, na.rm=TRUE), 4), ")\n\n")
+cat("   Nonlinear Min: ", round(mean(mc_min_nl_beaudry), 4), "(", round(sd(mc_min_nl_beaudry), 4), ")\n")
+cat("   Linear AR(3) Peak-Trough Movement: ", round(mean(mc_amp_lin_beaudry, na.rm=TRUE), 4), "(", round(sd(mc_amp_lin_beaudry, na.rm=TRUE), 4), ")\n")
+cat("   Nonlinear Peak-Trough Movement: ", round(mean(mc_amp_nl_beaudry, na.rm=TRUE), 4), "(", round(sd(mc_amp_nl_beaudry, na.rm=TRUE), 4), ")\n\n")
 #SM39
 library(mvtnorm)
 # =====================================================================
 # --- 1. Define Parameters (SM39 Bivariate System) ---
 # =====================================================================
-y_max <- 100
+y_max <- 100   
 I_min <- -50
 c <- 0.9
 beta <- 2
@@ -235,8 +239,9 @@ Burn_In <- 600     # Discard transient phase
 Num_Obs <- 300     # Periods to plot/analyze
 Total_Sim <- Burn_In + Num_Obs
 # Multivariate Shock Covariance Matrix
-eps_var <- matrix(c(0.0001, 0.00,
-                    0.00, 0.0001),
+eps <- 0.05
+sigma <- matrix(c(eps, 0.00,
+                    0.00, eps),
                   nrow = 2, byrow = TRUE)
 # =====================================================================
 # --- 2. MONTE CARLO SIMULATION (1000 Iterations) ---
@@ -260,7 +265,7 @@ set.seed(132)
 for (m in 1:M) {
 
   # A. Generate multivariate noise
-  shocks_m <- t(rmvnorm(Total_Sim + p, mean = c(0, 0), sigma = eps_var))
+  shocks_m <- t(rmvnorm(Total_Sim + p, mean = c(0, 0), sigma = sigma))
 
   ym <- numeric(Total_Sim + p)
   cm <- numeric(Total_Sim + p)
@@ -294,7 +299,7 @@ for (m in 1:M) {
   ylin_m[1] <- ts_y[1]; clin_m[1] <- ts_c[1]
 
   for (t in 2:Num_Obs) {
-    ylin_m[t] <- coef(r1_m)[1] + coef(r1_m)[2]*ylin_m[t-1] + coef(r1_m)[3]*clin_m[t-1] + shocks_m[1, Burn_In + p + t]
+    ylin_m[t] <- coef(r1_m)[1] + coef(r1_m)[2]*ylin_m[t-1] + coef(r1_m)[3]*clin_m[t-1] + shocks_m[1, Burn_In + p + t]+ (1+beta)*shocks_m[2, Burn_In+p + t]
     clin_m[t] <- coef(r2_m)[1] + coef(r2_m)[2]*ylin_m[t-1] + coef(r2_m)[3]*clin_m[t-1] + shocks_m[2, Burn_In + p + t]
   }
 
@@ -327,9 +332,13 @@ B_true <- matrix(c((c * beta) + c, -beta,
 true_eigen_dgp_2D <- max(Mod(eigen(B_true)$values))
 cat("--- 2D SM39 MODEL ---\n")
 cat("   [Series Y] Linear VAR(1) Volatility: ", round(mean(mc_sd_lin_y), 4), "(", round(sd(mc_sd_lin_y), 4), ")\n")
+cat("   [Series Y] Nonlinear Volatility: ", round(mean(mc_sd_nl_y), 4), "(", round(sd(mc_sd_nl_y), 4), ")\n")
 cat("   [Series Y] Linear VAR(1) Q1: ", round(mean(mc_Q1_lin_y), 4), "(", round(sd(mc_Q1_lin_y), 4), ")\n")
+cat("   [Series Y] Nonlinear Q1: ", round(mean(mc_Q1_nl_y), 4), "(", round(sd(mc_Q1_nl_y), 4), ")\n")
 cat("   [Series Y] Linear VAR(1) Min: ", round(mean(mc_min_lin_y), 4), "(", round(sd(mc_min_lin_y), 4), ")\n")
-cat("   [Series Y] Linear VAR(1) Peak-Trough Movement: ", round(mean(mc_amp_lin_y, na.rm=TRUE), 4), "(", round(sd(mc_amp_lin_y, na.rm=TRUE), 4), ")\n\n")
+cat("   [Series Y] Nonlinear Min: ", round(mean(mc_min_nl_y), 4), "(", round(sd(mc_min_nl_y), 4), ")\n")
+cat("   [Series Y] Linear VAR(1) Peak-Trough Movement: ", round(mean(mc_amp_lin_y, na.rm=TRUE), 4), "(", round(sd(mc_amp_lin_y, na.rm=TRUE), 4), ")\n")
+cat("   [Series Y] Nonlinear Peak-Trough Movement: ", round(mean(mc_amp_nl_y, na.rm=TRUE), 4), "(", round(sd(mc_amp_nl_y, na.rm=TRUE), 4), ")\n\n")
 #Three-dimensional BGST model
 library(mvtnorm)
 # =====================================================================
@@ -337,16 +346,17 @@ library(mvtnorm)
 # =====================================================================
 rho      <- 0.95
 theta    <- 0.913
-eta      <- 8
+eta      <- 2
 phi_inv  <- 0.25
 phi_cost <- 0.67
 repay    <- 0.1
 gamma    <- 0.5
 alpha <- 2.5
 # Shock Covariance Matrix
-eps_var <- matrix(c(0.0001, 0.00, 0.00,
-                    0.00, 0.0001, 0.00,
-                    0.00, 0.00, 0.0001),
+eps=0.05
+sigma <- matrix(c(eps, 0.00, 0.00,   
+                    0.00, eps, 0.00,  
+                    0.00, 0.00, eps), 
                   nrow = 3, byrow = TRUE)
 p <- 1             # Lags in the estimated VAR(1)
 Burn_In <- 600     # Discard transient phase
@@ -385,7 +395,7 @@ mc_ac1_nl_inv  <- numeric(M); mc_ac1_lin_inv  <- numeric(M)
 set.seed(456)
 for (m in 1:M) {
 
-  shocks_m <- t(rmvnorm(Total_Sim + p, mean=c(0,0,0), sigma = eps_var))
+  shocks_m <- t(rmvnorm(Total_Sim + p, mean=c(0,0,0), sigma = sigma))
   xm_NL <- matrix(0, nrow = 3, ncol = Total_Sim + p)
 
   for(t in 2:(Total_Sim + p)){
@@ -416,7 +426,12 @@ for (m in 1:M) {
 
   for (t in 2:Num_Obs) {
     States_m[,t] <- cm_real + J_m %*% States_m[,t-1]
-    States_m[, t] <- States_m[, t] + shocks_m[, Burn_In + p + t]
+    
+    shock=shocks_m[, Burn_In+p + t]
+    shock[2]=shock[2]+gamma*(shock[3]+phi_inv*(rho+theta)*shock[1]+phi_cost*alpha*eta*exp(eta*b_star)*shock[1])
+    shock[3]=shock[3]+phi_inv*(rho+theta)*shock[1]+phi_cost*alpha*eta*exp(eta*b_star)*shock[1]
+    
+    States_m[, t] <- States_m[, t] + shock
   }
 
   mc_sd_nl_inv[m] <- sd(series_m[, "Invest"])
@@ -443,15 +458,19 @@ for (m in 1:M) {
 }
 cat("--- 3D BGST MODEL ---\n")
 cat("   Linear VAR(1) Investment Volatility: ", round(mean(mc_sd_lin_inv), 4), "(", round(sd(mc_sd_lin_inv), 4), ")\n")
+cat("   Nonlinear Investment Volatility: ", round(mean(mc_sd_nl_inv), 4), "(", round(sd(mc_sd_nl_inv), 4), ")\n")
 cat("   Linear VAR(1) Q1: ", round(mean(mc_Q1_lin_inv), 4), "(", round(sd(mc_Q1_lin_inv), 4), ")\n")
+cat("   Nonlinear Q1: ", round(mean(mc_Q1_nl_inv), 4), "(", round(sd(mc_Q1_nl_inv), 4), ")\n")
 cat("   Linear VAR(1) Min: ", round(mean(mc_min_lin_inv), 4), "(", round(sd(mc_min_lin_inv), 4), ")\n")
-cat("   Linear VAR(1) Peak-Trough Movement: ", round(mean(mc_amp_lin_inv, na.rm=TRUE), 4), "(", round(sd(mc_amp_lin_inv, na.rm=TRUE), 4), ")\n\n")
+cat("   Nonlinear Min: ", round(mean(mc_min_nl_inv), 4), "(", round(sd(mc_min_nl_inv), 4), ")\n")
+cat("   Linear VAR(1) Peak-Trough Movement: ", round(mean(mc_amp_lin_inv, na.rm=TRUE), 4), "(", round(sd(mc_amp_lin_inv, na.rm=TRUE), 4), ")\n")
+cat("   Nonlinear Peak-Trough Movement: ", round(mean(mc_amp_nl_inv, na.rm=TRUE), 4), "(", round(sd(mc_amp_nl_inv, na.rm=TRUE), 4), ")\n\n")
 # =====================================================================
-# --- 6. COMPILE HIGH-QUALITY LATEX TABLE (Means and SDs) ---
+# --- 6. COMPILE LATEX TABLE (Means and SDs) ---
 # =====================================================================
 # Install if necessary: install.packages("kableExtra")
 library(kableExtra)
-# 1. BUILD THE DATA FRAME (Explicitly writing out Mean and SD with paste0 and round)
+# 1. BUILD THE DATA FRAME (rounding to four decimal places)
 results_df <- data.frame(
   Metric = c("Unconditional Mean",
              "Volatility",
