@@ -14,7 +14,7 @@ Rscript model_2_figures.R 0.9
 
 # To reproduce Figure 3 (eta=2.0):
 
-Rscript model_3_figures.R 8.0
+Rscript model_3_figures.R 2.0
 
 
 # To reproduce Figures 4, A1, and A2 (CDF Plots):
