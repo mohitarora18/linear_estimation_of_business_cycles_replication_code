@@ -12,20 +12,11 @@ Rscript model_1_figures.R
 Rscript model_2_figures.R 0.9
 
 
-# To reproduce Figure 3 (eta=8.0):
+# To reproduce Figure 3 (eta=2.0):
 
 Rscript model_3_figures.R 8.0
 
 
-# To reproduce Figure A1 (c=0.6):
-
-Rscript model_2_figures.R 0.6
-
-
-# To reproduce Figure A2 (eta=50.0):
-
-Rscript model_3_figures.R 50.0
-
-# To reproduce Figures 4, A3, and A4 (CDF Plots):
+# To reproduce Figures 4, A1, and A2 (CDF Plots):
 
 Rscript cdf_plots.R
